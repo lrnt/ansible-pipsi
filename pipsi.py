@@ -10,16 +10,16 @@ def is_package_installed(module, package_name):
     return search in output
 
 
-def install_package(module, package_name):
+def install_package(module, package_name, python):
     if is_package_installed(module, package_name):
         module.exit_json(
             changed=False,
             msg='package already installed'
         )
 
-    cmd = ['pipsi', 'install', package_name]
-    module.run_command(cmd, check_rc=True)
+    cmd = ['pipsi', 'install', '--python', python, package_name]
 
+    module.run_command(cmd, check_rc=True)
     module.exit_json(
         changed=True,
         msg='installed package'
@@ -51,13 +51,16 @@ def main():
             'state': {
                 'default': 'present',
                 'choices': ['present', 'absent'],
+            },
+            'python': {
+                'default': ''
             }
         }
     )
     params = module.params
 
     if params['state'] == 'present':
-        install_package(module, params['name'])
+        install_package(module, params['name'], params['python'])
     elif params['state'] == 'absent':
         remove_package(module, params['name'])
 
