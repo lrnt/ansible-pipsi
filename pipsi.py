@@ -26,6 +26,19 @@ def install_package(module, package_name, python):
     )
 
 
+def update_package(module, package_name, python):
+    if not is_package_installed(module, package_name):
+        install_package(module, package_name, python)
+
+    else:
+        cmd = ['pipsi', 'update', '--python', python, package_name]
+        module.run_command(cmd, check_rc=True)
+        module.exit_json(
+            changed=True,
+            msg='installed package'
+        )
+
+
 def remove_package(module, package_name):
     if not is_package_installed(module, package_name):
         module.exit_json(
@@ -50,7 +63,7 @@ def main():
             },
             'state': {
                 'default': 'present',
-                'choices': ['present', 'absent'],
+                'choices': ['present', 'absent', 'latest'],
             },
             'python': {
                 'default': ''
@@ -61,6 +74,8 @@ def main():
 
     if params['state'] == 'present':
         install_package(module, params['name'], params['python'])
+    elif params['state'] == 'latest':
+        update_package(module, params['name'], params['python'])
     elif params['state'] == 'absent':
         remove_package(module, params['name'])
 
