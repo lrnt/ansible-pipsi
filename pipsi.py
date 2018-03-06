@@ -31,12 +31,18 @@ def update_package(module, package_name, python):
         install_package(module, package_name, python)
 
     else:
-        cmd = ['pipsi', 'update', '--python', python, package_name]
-        module.run_command(cmd, check_rc=True)
-        module.exit_json(
-            changed=True,
-            msg='installed package'
-        )
+        cmd = ['pipsi', 'upgrade', package_name]
+        rc, out, _ = module.run_command(cmd)
+        if rc and 'up-to-date' in out:
+            module.exit_json(
+                changed=False,
+                msg='Package up to date'
+            )
+        elif not rc:
+            module.exit_json(
+                changed=True,
+                msg='upgraded package'
+            )
 
 
 def remove_package(module, package_name):
